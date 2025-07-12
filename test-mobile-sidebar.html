@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Test Mobile Sidebar</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: Arial, sans-serif; 
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: #2c3e50;
+            color: white;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        #sidebar.open {
+            left: 0;
+        }
+        
+        /* Overlay */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        #overlay.active {
+            display: block;
+        }
+        
+        /* Main content */
+        #main {
+            padding: 20px;
+        }
+        
+        #toggleBtn {
+            padding: 10px 15px;
+            font-size: 18px;
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .menu-item {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 0;
+            border-bottom: 1px solid #34495e;
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay"></div>
+    
+    <div id="sidebar">
+        <h2>🛌 FocusView</h2>
+        <a href="#" class="menu-item">🧠 Monitor</a>
+        <a href="#" class="menu-item">⌛ History</a>
+        <a href="#" class="menu-item">⚙️ Settings</a>
+        <a href="#" class="menu-item">🚪 Logout</a>
+    </div>
+    
+    <div id="main">
+        <button id="toggleBtn">☰ Menu</button>
+        <h1>Test Mobile Sidebar</h1>
+        <p>Klik tombol menu untuk test sidebar mobile</p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('toggleBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            function openSidebar() {
+                alert('Opening sidebar');
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function closeSidebar() {
+                alert('Closing sidebar');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            toggleBtn.addEventListener('click', function(e) {
+                alert('Button clicked!');
+                e.preventDefault();
+                
+                if (sidebar.classList.contains('open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+            
+            // Touch events
+            toggleBtn.addEventListener('touchend', function(e) {
+                alert('Touch detected!');
+                e.preventDefault();
+                
+                if (sidebar.classList.contains('open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+            
+            overlay.addEventListener('click', closeSidebar);
+        });
+    </script>
+</body>
+</html>

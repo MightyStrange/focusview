@@ -1,0 +1,416 @@
+/* ===================================================================
+ * COMPACT MOBILE STYLES FOR ALL PAGES
+ * =================================================================== */
+
+/* Universal Mobile Compact Adjustments */
+@media (max-width: 768px) {
+    /* Reduce overall spacing */
+    body {
+        padding: 5px !important;
+        font-size: 14px !important;
+        line-height: 1.4 !important;
+    }
+    
+    /* Compact headers */
+    h1 {
+        font-size: 1.5rem !important;
+        margin: 8px 0 !important;
+    }
+    
+    h2 {
+        font-size: 1.3rem !important;
+        margin: 6px 0 !important;
+    }
+    
+    h3 {
+        font-size: 1.1rem !important;
+        margin: 4px 0 !important;
+    }
+    
+    /* Compact paragraphs */
+    p {
+        margin: 4px 0 !important;
+        font-size: 0.9rem !important;
+    }
+    
+    /* Compact lists */
+    ul, ol {
+        margin: 4px 0 !important;
+        padding-left: 16px !important;
+    }
+    
+    li {
+        margin: 2px 0 !important;
+        font-size: 0.85rem !important;
+    }
+}
+
+/* LOGIN PAGE COMPACT */
+@media (max-width: 768px) {
+    .login-container {
+        padding: 15px !important;
+        margin: 10px !important;
+        max-width: 95vw !important;
+    }
+    
+    .login-header h2 {
+        font-size: 1.4rem !important;
+        margin: 8px 0 !important;
+    }
+    
+    .subtitle {
+        font-size: 0.8rem !important;
+        margin: 4px 0 8px 0 !important;
+    }
+    
+    .form-group {
+        margin: 8px 0 !important;
+    }
+    
+    .form-group input {
+        padding: 10px !important;
+        font-size: 14px !important;
+        height: auto !important;
+    }
+    
+    .login-btn {
+        padding: 12px !important;
+        font-size: 14px !important;
+        margin: 10px 0 !important;
+    }
+    
+    .signup-link {
+        font-size: 0.8rem !important;
+        margin-top: 8px !important;
+    }
+}
+
+/* MONITOR PAGE COMPACT */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 8px !important;
+        margin: 0 !important;
+    }
+    
+    .header-controls {
+        padding: 8px !important;
+        margin: 4px 0 !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+    
+    .header-controls h1 {
+        font-size: 1.2rem !important;
+        margin: 0 !important;
+    }
+    
+    .dashboard {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        margin: 8px 0 !important;
+    }
+    
+    .card {
+        padding: 12px !important;
+        margin: 4px 0 !important;
+        border-radius: 8px !important;
+    }
+    
+    .card h3 {
+        font-size: 1rem !important;
+        margin: 0 0 8px 0 !important;
+    }
+    
+    .stat-number {
+        font-size: 1.4rem !important;
+        margin: 4px 0 !important;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem !important;
+        margin: 2px 0 !important;
+    }
+    
+    .stats-list {
+        margin: 4px 0 !important;
+        padding: 0 !important;
+        list-style: none !important;
+    }
+    
+    .stats-list li {
+        padding: 2px 0 !important;
+        font-size: 0.8rem !important;
+        list-style: none !important;
+    }
+    
+    .control-buttons {
+        gap: 6px !important;
+        margin: 8px 0 !important;
+        flex-wrap: wrap !important;
+    }
+    
+    .btn {
+        padding: 8px 12px !important;
+        font-size: 0.8rem !important;
+        min-width: auto !important;
+        flex: 1 1 45% !important;
+    }
+    
+    /* Compact connection status */
+    #connectionStatus {
+        font-size: 0.8rem !important;
+        padding: 4px 8px !important;
+        margin: 4px 0 !important;
+    }
+    
+    /* Compact quality indicator */
+    .quality-indicator {
+        padding: 8px !important;
+        font-size: 0.9rem !important;
+        margin: 4px 0 !important;
+    }
+    
+    /* Compact chart */
+    #microsleepChart {
+        height: 180px !important;
+        margin: 8px 0 !important;
+    }
+    
+    /* Compact sleep log */
+    .sleep-log {
+        max-height: 150px !important;
+        overflow-y: auto !important;
+        font-size: 0.8rem !important;
+    }
+    
+    .sleep-recommendations {
+        font-size: 0.8rem !important;
+        padding-left: 12px !important;
+    }
+    
+    .sleep-recommendations li {
+        margin: 2px 0 !important;
+    }
+}
+
+/* SETTINGS PAGE COMPACT */
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 10px !important;
+        margin: 5px !important;
+    }
+    
+    .settings-section {
+        margin: 8px 0 !important;
+        padding: 8px !important;
+    }
+    
+    .settings-section h3 {
+        font-size: 1rem !important;
+        margin: 0 0 6px 0 !important;
+    }
+    
+    .setting-item {
+        margin: 6px 0 !important;
+        padding: 6px !important;
+    }
+    
+    .setting-label {
+        font-size: 0.85rem !important;
+        margin: 2px 0 !important;
+    }
+    
+    input[type="text"], 
+    input[type="email"], 
+    input[type="password"],
+    select {
+        padding: 8px !important;
+        font-size: 14px !important;
+        margin: 4px 0 !important;
+    }
+}
+
+/* HISTORY PAGE COMPACT */
+@media (max-width: 768px) {
+    .history-container {
+        padding: 8px !important;
+        margin: 4px !important;
+    }
+    
+    .main-content {
+        padding: 80px 10px 10px 10px !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    
+    .content-header {
+        margin-bottom: 15px !important;
+        padding: 10px !important;
+        background: rgba(255,255,255,0.98) !important;
+        border-radius: 8px !important;
+        position: relative !important;
+        z-index: 100 !important;
+    }
+    
+    .date-filter {
+        padding: 6px !important;
+        margin: 4px 0 !important;
+        flex-wrap: wrap !important;
+        gap: 4px !important;
+    }
+    
+    .history-table {
+        font-size: 0.8rem !important;
+    }
+    
+    .history-table th,
+    .history-table td {
+        padding: 4px 6px !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .export-options {
+        gap: 4px !important;
+        margin: 6px 0 !important;
+    }
+    
+    .chart-container {
+        height: 200px !important;
+        margin: 8px 0 !important;
+    }
+}
+
+/* REGISTER PAGE COMPACT */
+@media (max-width: 768px) {
+    .register-container {
+        padding: 12px !important;
+        margin: 8px !important;
+        max-width: 95vw !important;
+    }
+    
+    .register-header h2 {
+        font-size: 1.3rem !important;
+        margin: 6px 0 !important;
+    }
+    
+    .form-row {
+        flex-direction: column !important;
+        gap: 6px !important;
+    }
+    
+    .form-group {
+        margin: 6px 0 !important;
+    }
+    
+    .register-btn {
+        padding: 10px !important;
+        font-size: 14px !important;
+        margin: 8px 0 !important;
+    }
+    
+    .login-link {
+        font-size: 0.8rem !important;
+        margin-top: 6px !important;
+    }
+}
+
+/* COMPACT SIDEBAR FOR ALL PAGES */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 80vw !important;
+        max-width: 280px !important;
+    }
+    
+    .sidebar-header {
+        padding: 12px !important;
+    }
+    
+    .sidebar-header h2 {
+        font-size: 1.1rem !important;
+    }
+    
+    .sidebar-nav a {
+        padding: 10px 12px !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .sidebar .icon {
+        font-size: 1rem !important;
+        margin-right: 8px !important;
+    }
+    
+    .sidebar .text {
+        font-size: 0.9rem !important;
+    }
+}
+
+/* COMPACT BUTTONS FOR ALL PAGES */
+@media (max-width: 768px) {
+    button {
+        padding: 8px 12px !important;
+        font-size: 0.85rem !important;
+        margin: 2px !important;
+        border-radius: 6px !important;
+    }
+    
+    .btn-primary {
+        padding: 10px 16px !important;
+    }
+    
+    .btn-secondary {
+        padding: 8px 14px !important;
+    }
+    
+    .btn-danger {
+        padding: 8px 14px !important;
+    }
+    
+    .btn-warning {
+        padding: 8px 14px !important;
+    }
+}
+
+/* COMPACT ANIMATIONS - Reduced for performance */
+@media (max-width: 768px) {
+    * {
+        animation-duration: 0.2s !important;
+        transition-duration: 0.2s !important;
+    }
+    
+    /* Disable complex animations on mobile */
+    .particles,
+    .shape,
+    body::before,
+    body::after {
+        display: none !important;
+    }
+}
+
+/* COMPACT TEXT AND SPACING */
+@media (max-width: 768px) {
+    .time-remaining {
+        font-size: 0.75rem !important;
+        margin: 2px 0 !important;
+    }
+    
+    .daily-counter {
+        padding: 10px !important;
+    }
+    
+    /* Reduce vertical spacing everywhere */
+    .card + .card {
+        margin-top: 6px !important;
+    }
+    
+    /* Compact forms */
+    .form-group + .form-group {
+        margin-top: 8px !important;
+    }
+    
+    /* Compact status indicators */
+    .status-indicator {
+        padding: 4px 8px !important;
+        font-size: 0.8rem !important;
+        border-radius: 4px !important;
+    }
+}

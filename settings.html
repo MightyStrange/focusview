@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengaturan - Sleep Cycle Monitor</title>
+  <link rel="stylesheet" href="assets/settings.css">
+  <link rel="stylesheet" href="assets/mobile-compact.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <a href="monitor.html" class="back-button" aria-label="Kembali ke halaman monitor">
+        <span>&#8592;</span> </a>
+      <h2>⚙️ Pengaturan</h2>
+      <p>Kelola akun dan pengaturan perangkat Anda</p>
+    </div>
+
+    <div class="tabs">
+      <button class="active" onclick="showTab('akun', this)">👤 Manajemen Akun</button>
+      <button onclick="showTab('perangkat', this)">📱 Informasi Perangkat</button>
+      <button onclick="showTab('tentang', this)">ℹ️ Tentang Kami</button>
+    </div>
+
+    <div id="akun" class="tab-content active">
+      <h3>👤 Manajemen Akun</h3>
+      <form id="accountForm">
+        <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" >
+      </div>
+        <div class="form-group">
+          <label>Nama Lengkap</label>
+          <input type="text" name="nama" placeholder="Masukkan nama lengkap Anda">
+        </div>
+
+        <div class="form-group">
+          <label>Nomor HP</label>
+          <input type="text" name="no_hp" placeholder="08xxxxxxxxxx">
+        </div>
+
+        <div class="form-group" style="position: relative;"> <label>Password Baru</label>
+  <input type="password" name="password" placeholder="Kosongkan jika tidak ingin mengubah" id="passwordInput"> <span class="password-toggle" id="passwordToggle">&#128065;</span> </div>
+
+        <button type="submit" class="save-btn">💾 Simpan Perubahan</button>
+      </form>
+    </div>
+
+    <div id="perangkat" class="tab-content">
+      <h3>📱 Informasi Perangkat</h3>
+      
+      <div class="info-card">
+    <div class="info-item">
+        <span class="info-label">Nama Bluetooth</span>
+        <span class="info-value">Loading...</span>
+    </div>
+    <div class="info-item">
+        <span class="info-label">ID Bluetooth</span>
+        <span class="info-value">Loading...</span>
+    </div>
+    <div class="info-item">
+  <span class="info-label">ID Perangkat</span>
+  <span class="info-value" id="device-id">Loading...</span>
+</div>
+
+</div>
+
+      
+    </div>
+
+    <div id="tentang" class="tab-content">
+      <h3>ℹ️ Tentang Kami</h3>
+      
+      <div class="about-section">
+        <h4>🌙 Sleep Cycle Monitor</h4>
+        <p><strong>Sleep Cycle Monitor</strong> adalah sistem pemantauan tidur yang inovatif menggunakan sensor IR dan ESP32. Sistem ini dirancang khusus untuk mendeteksi micro-sleep dan membantu pengguna agar tetap aman saat beraktivitas penting seperti menyetir atau bekerja lembur.</p>
+        
+        <p>Dengan teknologi sensor IR dan algoritma pembelajaran mesin, aplikasi ini dapat memberikan peringatan dini ketika mendeteksi tanda-tanda kantuk, sehingga dapat mencegah kecelakaan yang disebabkan oleh microsleep.</p>
+      </div>
+
+      <div class="version-info">
+        <div class="version-card">
+          <strong>📦 Versi Aplikasi</strong>
+          <span>1.0.0</span>
+        </div>
+        <div class="version-card">
+          <strong>👥 Dikembangkan oleh</strong>
+          <span>Mighty Strange</span>
+        </div>
+        <div class="version-card">
+          <strong>📅 Rilis</strong>
+          <span>Juni 2025</span>
+        </div>
+        <div class="version-card">
+          <strong>🛠️ Platform</strong>
+          <span>ESP32 + Web App</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ <script>
+
+    fetch('get_id_perangkat.php')
+  .then(res => res.json())
+  .then(data => {
+    const deviceSpan = document.getElementById('device-id');
+
+    if (data.status === 'success' && data.id_perangkat.length > 0) {
+      // Tampilkan ID pertama dari daftar
+      deviceSpan.textContent = data.id_perangkat[0];
+    } else {
+      deviceSpan.textContent = 'Tidak tersedia';
+    }
+  })
+  .catch(error => {
+    console.error('Gagal memuat ID perangkat:', error);
+    document.getElementById('device-id').textContent = 'Gagal memuat';
+  });
+
+
+        function showTab(id, button) {
+            // Remove active class from all tabs and buttons
+            const tabs = document.querySelectorAll(".tab-content");
+            const buttons = document.querySelectorAll(".tabs button");
+            
+            tabs.forEach(tab => tab.classList.remove("active"));
+            buttons.forEach(btn => btn.classList.remove("active"));
+            
+            // Add active class to selected tab and button
+            document.getElementById(id).classList.add("active");
+            button.classList.add("active");
+
+            // Jika tab yang aktif adalah "Manajemen Akun", muat data
+            if (id === 'akun') {
+                loadAccountData();
+            }
+        }
+
+        function loadAccountData() {
+    fetch('get_account_data.php')
+        .then(res => {
+            const contentType = res.headers.get('content-type');
+            if (contentType && contentType.indexOf('application/json') !== -1) {
+                return res.json();
+            } else {
+                return res.text().then(text => {
+                    throw new Error('Server response was not JSON: ' + text);
+                });
+            }
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                // Isi data ke form
+                document.querySelector('input[name="nama"]').value = data.nama || '';
+                document.querySelector('input[name="no_hp"]').value = data.no_hp || '';
+
+                // Format nomor HP jika ada
+                const noHpInput = document.querySelector('input[name="no_hp"]');
+                if (noHpInput.value) {
+                    let value = noHpInput.value.replace(/\D/g, '');
+                    if (value.startsWith('0')) {
+                        value = '+62' + value.substring(1);
+                    } else if (!value.startsWith('+62') && value !== '') {
+                        value = '+62' + value;
+                    }
+                    noHpInput.value = value;
+                }
+            } else {
+                if (data.message && data.message.toLowerCase().includes('belum login')) {
+                    alert('Session berakhir. Silakan login kembali.');
+                    // Redirect ke halaman login jika diperlukan
+                    window.location.href = 'index.html'; // ubah sesuai halaman login Anda
+                } else {
+                    console.error('Gagal memuat data akun:', data.message);
+                    alert('Gagal memuat data akun: ' + (data.message || 'Terjadi kesalahan.'));
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching account data:', error);
+            alert('Terjadi kesalahan jaringan saat memuat data akun: ' + error.message);
+        });
+}
+
+
+        document.getElementById('accountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('.save-btn');
+            const originalText = btn.innerHTML; // Simpan teks asli
+            btn.innerHTML = '⏳ Menyimpan...';
+            btn.disabled = true;
+
+            const formData = new FormData(this);
+
+            // Bagian ini yang benar-benar melakukan permintaan ke settings.php
+            fetch('settings.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => {
+                // Periksa apakah respons adalah JSON yang valid
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.indexOf('application/json') !== -1) {
+                    return res.json();
+                } else {
+                    // Jika bukan JSON, berarti ada error PHP atau output lain
+                    return res.text().then(text => {
+                        throw new Error('Server response was not JSON: ' + text);
+                    });
+                }
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    btn.innerHTML = '✅ Tersimpan!';
+                    // Setelah berhasil menyimpan, muat ulang data untuk memastikan field terupdate
+                    loadAccountData(); 
+                } else {
+                    alert(data.message || 'Gagal menyimpan');
+                    btn.innerHTML = originalText; // Kembalikan teks asli jika gagal
+                }
+            })
+            .catch((error) => { // Tangkap error jaringan atau error parsing JSON
+                console.error('Error:', error);
+                alert('Terjadi kesalahan: ' + error.message + '. Silakan periksa konsol browser untuk detail lebih lanjut.');
+                btn.innerHTML = originalText; // Kembalikan teks asli jika ada error
+            })
+            .finally(() => {
+                // Setelah 2 detik, kembalikan tombol ke keadaan semula
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            });
+        });
+
+
+
+      function loadDeviceInfo() {
+    fetch('get_device_info.php')
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.querySelector('.info-item:nth-child(1) .info-value').textContent = data.nama_bluetooth || 'Tidak diketahui';
+                document.querySelector('.info-item:nth-child(2) .info-value').textContent = data.id_bluetooth || 'Tidak diketahui';
+            } else {
+                console.error('Gagal memuat info perangkat:', data.message);
+                alert('Gagal memuat info perangkat: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Gagal memuat info perangkat:', error);
+            alert('Gagal memuat info perangkat. Silakan coba lagi.');
+        });
+}
+
+ function showTab(id, button) {
+    // hapus aktif dari semua tab dan tombol
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+
+    // aktifkan tab dan tombol yang dipilih
+    document.getElementById(id).classList.add('active');
+    button.classList.add('active');
+
+    // muat data jika tab perangkat aktif
+    if (id === 'perangkat') {
+        loadDeviceInfo();
+    }
+}
+        // Phone number formatting
+        // Diubah dari 'hp' menjadi 'no_hp' agar sesuai dengan HTML
+        // Fungsi utilitas untuk memformat nomor telepon
+    function formatPhoneNumber(value) {
+        let cleanValue = value.replace(/\D/g, ''); // Hapus semua non-digit
+        
+        // Cek jika sudah diawali '+62', biarkan saja
+        if (cleanValue.startsWith('62')) {
+            // Jika ada '62' di awal, pastikan tidak ada '0' di depan '62'
+            if (cleanValue.startsWith('062')) {
+                cleanValue = '62' + cleanValue.substring(3); // Hapus '0' setelah '+62'
+            }
+            return '+' + cleanValue;
+        } 
+        // Jika dimulai dengan '0'
+        else if (cleanValue.startsWith('0')) {
+            return '+62' + cleanValue.substring(1);
+        } 
+        // Jika tidak diawali '+62' atau '0' dan ada isinya
+        else if (cleanValue !== '') {
+            return '+62' + cleanValue;
+        }
+        return ''; // Jika kosong, kembalikan kosong
+    }
+
+        // Add input validation feedback
+        document.querySelectorAll('input:not([disabled])').forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() === '' && this.hasAttribute('required')) {
+                    this.style.borderColor = '#e53e3e';
+                } else if (this.value.trim() !== '') {
+                    this.style.borderColor = '#38a169';
+                }
+            });
+
+            input.addEventListener('input', function() {
+                this.style.borderColor = '#e1e5e9';
+            });
+        });
+
+        // Panggil loadAccountData() saat DOM selesai dimuat
+        // untuk mengisi form Manajemen Akun secara otomatis jika itu tab default.
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('akun').classList.contains('active')) {
+                loadAccountData();
+            }
+        });
+
+        // Fungsi untuk mengalihkan tampilan password
+document.addEventListener('DOMContentLoaded', function() {
+    // Pastikan elemen sudah ada sebelum menambahkan event listener
+    const passwordInput = document.getElementById('passwordInput');
+    const passwordToggle = document.getElementById('passwordToggle');
+
+    if (passwordInput && passwordToggle) {
+        passwordToggle.addEventListener('click', function() {
+            // Toggle tipe input
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+
+            // Toggle ikon mata
+            this.innerHTML = (type === 'password') ? '&#128065;' : '&#128064;'; // Mata tertutup vs mata terbuka
+        });
+    }
+
+    // Pastikan loadAccountData() tetap terpanggil saat DOMContentLoaded
+    if (document.getElementById('akun').classList.contains('active')) {
+        loadAccountData();
+    }
+});
+    </script>
+    <script src="pwa-install.js"></script>
+</body>
+</html>

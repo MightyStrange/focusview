@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>FocusView Sleep Monitor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <link rel="stylesheet" href="assets/style.css" />
+    <link rel="stylesheet" href="assets/mobile-compact.css">
+    <!-- Add Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* Mobile sidebar fix - inline styles */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed !important;
+                top: 0 !important;
+                left: -100% !important;
+                width: 85vw !important;
+                max-width: 300px !important;
+                height: 100vh !important;
+                z-index: 9999 !important;
+                transition: left 0.3s ease !important;
+                background: #2c3e50 !important;
+            }
+            
+            .sidebar.mobile-open {
+                left: 0 !important;
+            }
+            
+            .sidebar-overlay {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                background: rgba(0,0,0,0.5) !important;
+                z-index: 9998 !important;
+                display: none !important;
+            }
+            
+            .sidebar-overlay.active {
+                display: block !important;
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2><span class="icon">🛌</span><span class="text">FocusView</span></h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="monitor.html"><span class="icon">🧠</span><span class="text">Monitor</span></a>
+            <a href="history.html"><span class="icon">⌛</span><span class="text">History</span></a>
+            <a href="settings.html"><span class="icon">⚙️</span><span class="text">Settings</span></a>
+            <a href="index.html"><span class="icon">🚪</span><span class="text">Logout</span></a>
+        </nav>
+    </div>
+    <div class="main-content">
+        <div class="header-controls">
+            <div>
+                <button id="toggleSidebar" onclick="chromeMobileToggle()" style="font-size: 18px; padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">☰</button>
+                <h1>Monitor Kualitas Tidur</h1>
+            </div>
+            <button id="connect">Hubungkan ke FocusView</button>
+        </div>
+
+        <div id="connectionStatus">Status: Disconnected</div>
+        <div id="connectionDetails"></div>
+
+        <div class="dashboard">
+            <div class="card daily-counter">
+                <h3>🔴 Jumlah Microsleep Hari Ini</h3>
+                <div class="stat-number" id="dailyMicrosleepCount">0</div>
+                <div class="stat-label">Episode Microsleep Hari Ini</div>
+                <div class="time-remaining" id="dailyTimeRemaining">
+                    Diatur ulang pada tengah malam
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📊 Statistik Mingguan</h3>
+                <div class="stat-number" id="weeklyCount">0</div>
+                <div class="stat-label">Total Microsleep Episode</div>
+                <div class="stat-number" id="sleepHours">0.0</div>
+                <div class="stat-label">Jam yang dipantau</div>
+                <div class="stat-number" id="microsleepRate">0.00/hr</div>
+                <div class="stat-label">Tingkat Microsleep Mingguan</div>
+            </div>
+
+            <div class="card" id="monthlyCard">
+            <h3>📊 Statistik Bulanan</h3>
+            <ul class="stats-list">
+                <li><span class="stat-number"  id="monthlyCount">0</span> Total Microsleep Episode</li>
+                <li><span class="stat-number"  id="monthlyHours">0.0</span> Jam yang dipantau</li>
+                <li><span class="stat-number"  id="monthlyMicrosleepRate">0.00/hr</span> Rata-rata Tingkat Microsleep</li>
+                <li><span class="stat-number"  id="monthlyAvgPerDay">0</span> Rata-rata Microsleep / Hari</li>
+                <li><span class="stat-number"  id="monthlyZeroDays">0</span> Hari tanpa Microsleep</li>
+                <li>Total Tanpa Microsleep: <span class="stat-number" id="monthlyLongestStreak">0 d</span></li>
+            </ul>
+            </div>
+            
+            <!-- Add chart card -->
+            <div class="card">
+                <h3>📈 Grafik Batang Bulanan</h3>
+                <!-- Tinggi 250 px supaya terlihat rapi; bisa di-CSS -->
+                <div id="microsleepChart" style="height:250px;"></div>
+                <p style="font-size:0.85rem;color:#666;margin-top:8px;">
+                    • Tiap batang = jumlah microsleep per tanggal<br>
+                    • Semakin pendek batang → semakin baik
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>🎯 Kualitas Tidur</h3>  
+                <div class="quality-indicator" id="qualityIndicator">
+                    Tidak Cukup Data
+                </div>
+                <div style="margin-top: 15px; font-size: 0.9rem; color: #666;" id="qualityDescription">
+                   Mulai pemantauan untuk mendapatkan analisis kualitas tidur
+                </div>
+            </div>
+
+             <div class="card">
+                <h3>📝 Rekomendasi untuk Meningkatkan Kualitas Tidur</h3>
+                <ul class="sleep-recommendations" id="sleepRecommendations">
+                    <!-- Recommendations will be inserted here -->
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>📝 Aktivitas Terbaru</h3>
+                <div class="sleep-log" id="sleepLog">
+                    <div style="text-align: center; color: #666; font-style: italic;">
+                       Belum ada aktivitas yang tercatat
+                    </div>
+                </div>
+            </div>
+
+           
+        </div>
+
+        <div class="control-buttons">
+            <button class="btn btn-secondary" id="exportData">Ekspor Data</button>
+            <button class="btn btn-warning" id="resetData">Setel Ulang Data Mingguan</button>
+            <button class="btn btn-danger" id="resetAllData">Setel Ulang Semua Data</button>
+            <button class="btn btn-primary" id="saveActivity">Simpan Aktivitas</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="pwa-install.js"></script>
+    
+    <script>
+        // Simple inline onclick handler for Chrome Mobile
+        let sidebarOpen = false;
+        
+        function chromeMobileToggle() {
+            try {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                
+                if (!sidebar || !overlay) {
+                    return;
+                }
+                
+                if (sidebarOpen) {
+                    // Close sidebar
+                    sidebar.style.display = 'none';
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = '';
+                    sidebarOpen = false;
+                } else {
+                    // Open sidebar
+                    sidebar.style.display = 'block';
+                    sidebar.style.position = 'fixed';
+                    sidebar.style.top = '0';
+                    sidebar.style.left = '0';
+                    sidebar.style.width = '85vw';
+                    sidebar.style.maxWidth = '300px';
+                    sidebar.style.height = '100vh';
+                    sidebar.style.zIndex = '9999';
+                    sidebar.style.background = '#2c3e50';
+                    
+                    overlay.style.display = 'block';
+                    overlay.style.position = 'fixed';
+                    overlay.style.top = '0';
+                    overlay.style.left = '0';
+                    overlay.style.width = '100%';
+                    overlay.style.height = '100%';
+                    overlay.style.background = 'rgba(0,0,0,0.5)';
+                    overlay.style.zIndex = '9998';
+                    
+                    document.body.style.overflow = 'hidden';
+                    sidebarOpen = true;
+                }
+            } catch (e) {
+                console.log('Sidebar error:', e.message);
+            }
+        }
+        
+        // Overlay click to close
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.id === 'sidebarOverlay' && sidebarOpen) {
+                chromeMobileToggle();
+            }
+        });
+    </script>
+</body>
+</html>

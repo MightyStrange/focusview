@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FocusView Sleep Monitor</title>
+<link rel="stylesheet" href="assets/history.css">
+<link rel="stylesheet" href="assets/mobile-compact.css">
+
+</head>
+<body>
+
+<!-- Mobile header -->
+<div class="mobile-header">
+  <h1><span>🛌</span> FocusView</h1>
+  <button class="mobile-toggle" id="mobileToggle">☰</button>
+</div>
+
+<!-- Overlay for mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2><span class="icon">🛌</span><span class="text">FocusView</span></h2>
+    
+  </div>
+  <nav class="sidebar-nav">
+    <a href="monitor.html"><span class="icon">🧠</span><span class="text">Monitor</span></a>
+    <a href="history.html"><span class="icon">⌛</span><span class="text">History</span></a>
+    <a href="settings.html"><span class="icon">⚙️</span><span class="text">Settings</span></a>
+    <a href="index.html"><span class="icon">🚪</span><span class="text">Logout</span></a>
+  </nav>
+</div>
+<br>
+<br>
+<br>
+<!-- Main Content -->
+<div class="main-content" id="mainContent">
+    <div class="content-header">
+        <h1 class="content-title">Sleep Monitoring History</h1>
+        <p class="content-subtitle">Track and analyze your sleep patterns and microsleep events</p>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-primary" onclick="loadHistory()">
+            <span>🔄</span>
+            Load history
+        </button>
+        <button class="btn btn-secondary" onclick="exportData()">
+            <span>📊</span>
+            Export data
+        </button>
+        <button class="btn btn-danger" id="deleteSelectedBtn">
+    <span>🗑️</span>
+    Hapus Terpilih
+</button>
+    </div>
+
+    <div class="table-container">
+        <div class="table-header">
+            <h2 class="table-title">Sleep Records</h2>
+            <div class="table-stats">
+                <div class="stat-item">
+                    <span>📊</span>
+                    <span id="totalRecords">0 records</span>
+                </div>
+                <div class="stat-item">
+                    <span>🕐</span>
+                    <span id="lastUpdate">Never</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Controls -->
+        <div class="search-controls">
+            <div class="search-row">
+        
+                <div class="filter-field">
+                    <label for="dateFilter">📅 Date:</label>
+                    <input type="date" id="dateFilter" />
+                </div>
+                <div class="filter-field">
+                    <label for="deviceFilter">📱 Device:</label>
+                    <select id="deviceFilter">
+                        <option value="">All Devices</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label for="qualityFilter">💤 Quality:</label>
+                    <select id="qualityFilter">
+                        <option value="">All Qualities</option>
+                        <option value="poor">Poor</option>
+                        <option value="average">Average</option>
+                        <option value="good">Good</option>
+                        <option value="excellent">Excellent</option>
+                    </select>
+                </div>
+                <div class="search-actions">
+                    <button class="btn btn-sm btn-primary" onclick="applyFilters()" id="filterBtn">
+                        <span>🎯</span>
+                        <span class="btn-text">Filter</span>
+                    </button>
+                    <button class="btn btn-sm btn-secondary" onclick="clearFilters()" id="clearBtn">
+                        <span>🔄</span>
+                        <span class="btn-text">Clear</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+           <table id="historyTable">
+  <thead>
+  <tr>
+    <th><input type="checkbox" id="selectAll" /></th>
+    <th>ID</th>
+    <th>Timestamp</th>
+    <th>Device</th>
+
+    <!-- metrik harian -->
+    <th>Microsleeps (Day)</th>
+
+    <!-- metrik mingguan -->
+    <th>Microsleeps (Week)</th>
+    <th>Hours (Week)</th>
+    <th>Rate (Week %)</th>
+
+    <!-- metrik bulanan -->
+    <th>Microsleeps (Month)</th>
+    <th>Hours (Month)</th>
+    <th>Rate (Month %)</th>
+
+    <!-- ringkasan -->
+    <th>Sleep Quality</th>
+  </tr>
+</thead>
+  <tbody>
+    <tr>
+      <td colspan="12" class="empty-state">
+        <div>No data available</div>
+        <small>Click "Load History" to fetch your sleep records</small>
+      </td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><span>⚠️</span> Delete Sleep History</h3>
+    </div>
+    <div class="modal-body">
+      <p>Are you sure you want to delete all sleep history records?</p>
+      <p><strong>This action cannot be undone!</strong></p>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="hideDeleteModal()">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" onclick="deleteHistory()">Delete All</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Sidebar functionality
+const sidebar = document.getElementById('sidebar');
+const toggleBtn = document.getElementById('toggleBtn');
+const mobileToggle = document.getElementById('mobileToggle');
+const overlay = document.getElementById('sidebarOverlay');
+const mainContent = document.getElementById('mainContent');
+
+// Mobile toggle
+if (mobileToggle) {
+    mobileToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    });
+}
+
+// Close sidebar when clicking overlay
+if (overlay) {
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+    });
+}
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+    }
+});
+
+// Load sleep history data
+function loadHistory() {
+    const tbody = document.querySelector('#historyTable tbody');
+    const totalRecords = document.getElementById('totalRecords');
+    const lastUpdate = document.getElementById('lastUpdate');
+    
+    if (!tbody) {
+        console.error('Table body not found');
+        return;
+    }
+    
+    // Show loading
+    tbody.innerHTML = '<tr><td colspan="12" class="loading">Loading sleep data...</td></tr>';
+    
+    fetch('get_sleep_data.php')
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            if (!Array.isArray(data) || data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="12" class="empty-state">
+                            <div>No sleep records found</div>
+                            <small>Start monitoring to see your data here</small>
+                        </td>
+                    </tr>
+                `;
+                if (totalRecords) totalRecords.textContent = '0 records';
+                if (lastUpdate) lastUpdate.textContent = 'Never';
+                return;
+            }
+            
+            // Store data for filtering
+            allSleepData = data;
+            filteredData = data;
+            
+            // Update device filter options
+            updateDeviceFilterOptions(data);
+            
+            tbody.innerHTML = '';
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+               tr.innerHTML = `
+       <td><input type="checkbox" class="rowCheckbox" data-id="${row.id}"></td>
+       <td><strong>#${row.id}</strong></td>
+       <td>${formatTimestamp(row.timestamp)}</td>
+       <td>${row.device_name ?? '-'}</td>
+
+       <td>${row.daily_microsleeps}</td>
+
+       <td>${row.weekly_microsleeps}</td>
+       <td>${fmt(row.weekly_hours)}</td>
+       <td>${fmt(row.weekly_rate)}%</td>
+
+       <td>${row.monthly_microsleeps}</td>
+       <td>${fmt(row.monthly_hours)}</td>
+       <td>${fmt(row.monthly_rate)}%</td>
+
+       
+       <td>${row.sleep_quality}</td>
+    `;  
+                tbody.appendChild(tr);
+            });
+            
+            // Re-attach event listeners untuk checkbox yang baru dibuat
+            attachCheckboxListeners();
+            
+            if (totalRecords) totalRecords.textContent = `${data.length} records`;
+            if (lastUpdate) lastUpdate.textContent = new Date().toLocaleString();
+        })
+        .catch(error => {
+            console.error('Error loading data:', error);
+            showError();
+        });
+}
+
+// helper supaya tidak NaN
+function fmt(val, digit = 2){
+  const n = parseFloat(val);
+  return isNaN(n) ? '0.00' : n.toFixed(digit);
+}
+
+function loadSleepData(){
+  fetch('get_sleep_data.php')
+    .then(res => {
+       if(!res.ok) throw new Error('HTTP '+res.status);
+       return res.json();
+    })
+    .then(renderTable)
+    .catch(err => {
+       console.error(err);
+       alert('Failed to load sleep data\nPlease check your connection and try again');
+    });
+}
+
+// Attach event listeners untuk checkbox
+function attachCheckboxListeners() {
+    // Event listener untuk individual checkboxes
+    const rowCheckboxes = document.querySelectorAll('.rowCheckbox');
+    rowCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectAllState);
+    });
+    
+    // Update state select all checkbox
+    updateSelectAllState();
+}
+
+// Update state dari select all checkbox
+function updateSelectAllState() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const rowCheckboxes = document.querySelectorAll('.rowCheckbox');
+    const checkedBoxes = document.querySelectorAll('.rowCheckbox:checked');
+    
+    if (!selectAllCheckbox) return;
+    
+    if (rowCheckboxes.length === 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+    } else if (checkedBoxes.length === rowCheckboxes.length) {
+        selectAllCheckbox.checked = true;
+        selectAllCheckbox.indeterminate = false;
+    } else if (checkedBoxes.length > 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = true;
+    } else {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+    }
+    
+    // Update visibility tombol delete
+    updateDeleteButtonVisibility();
+}
+
+// Update visibility tombol delete selected
+function updateDeleteButtonVisibility() {
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    const checkedBoxes = document.querySelectorAll('.rowCheckbox:checked');
+    
+    if (deleteBtn) {
+        if (checkedBoxes.length > 0) {
+            deleteBtn.style.display = 'inline-block';
+            deleteBtn.textContent = `Hapus Terpilih (${checkedBoxes.length})`;
+        } else {
+            deleteBtn.style.display = 'none';
+        }
+    }
+}
+
+// Helper function to format timestamp
+function formatTimestamp(timestamp) {
+    // Handle MySQL datetime format "YYYY-MM-DD HH:MM:SS" as local time
+    if (typeof timestamp === 'string' && timestamp.includes('-') && timestamp.includes(':')) {
+        // Parse as local time by adding timezone offset
+        const localTimestamp = timestamp.replace(' ', 'T');
+        const date = new Date(localTimestamp);
+        
+        if (isNaN(date.getTime())) {
+            return timestamp;
+        }
+        
+        // Format with Indonesian locale and WITA timezone
+        return date.toLocaleString('id-ID', {
+            timeZone: 'Asia/Makassar',
+            year: 'numeric',
+            month: '2-digit', 
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+    }
+    
+    // Fallback for other timestamp formats
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) {
+        return timestamp;
+    }
+    return date.toLocaleString('id-ID', { timeZone: 'Asia/Makassar' });
+}
+
+// Show error message
+function showError() {
+    const tbody = document.querySelector('#historyTable tbody');
+    if (tbody) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="12" style="text-align: center; padding: 40px; color: #ef4444;">
+                    <div style="font-size: 24px; margin-bottom: 10px;">⚠️</div>
+                    <div>Failed to load sleep data</div>
+                    <small>Please check your connection and try again</small>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Export data to CSV
+function exportData() {
+    const table = document.getElementById('historyTable');
+    if (!table) {
+        alert('Table not found');
+        return;
+    }
+    
+    const rows = Array.from(table.querySelectorAll('tr'));
+    
+    // Header
+    const headerCells = Array.from(rows[0].querySelectorAll('th')).map(th => th.innerText.trim());
+    
+    // Data rows
+    const dataRows = rows.slice(1).map(row => {
+        const cells = Array.from(row.querySelectorAll('td'));
+        return cells.map(td => td.innerText.trim());
+    });
+    
+    // Create CSV string
+    let csvContent = '';
+    csvContent += headerCells.join(',') + '\n';
+    dataRows.forEach(rowArray => {
+        const escapedRow = rowArray.map(cell => `"${cell.replace(/"/g, '""')}"`);
+        csvContent += escapedRow.join(',') + '\n';
+    });
+    
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sleep_data_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Modal functions
+function showDeleteModal() {
+    const deleteModal = document.getElementById('deleteModal');
+    if (deleteModal) {
+        deleteModal.classList.add('show');
+    }
+}
+
+function hideDeleteModal() {
+    const deleteModal = document.getElementById('deleteModal');
+    if (deleteModal) {
+        deleteModal.classList.remove('show');
+    }
+}
+
+// Delete all history
+function deleteHistory() {
+    const confirmDelete = confirm('Apakah Anda yakin ingin menghapus semua data?');
+    if (!confirmDelete) return;
+    
+    // Show loading
+    const confirmBtn = document.querySelector('#deleteModal .confirm');
+    if (confirmBtn) {
+        confirmBtn.textContent = 'Menghapus...';
+        confirmBtn.disabled = true;
+    }
+    
+    // Try FormData method first
+    const formData = new FormData();
+    formData.append('action', 'delete_all');
+    
+    fetch('delete_sleep_data.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => {
+        console.log('Delete all response status:', res.status);
+        return res.text();
+    })
+    .then(text => {
+        console.log('Delete all response:', text);
+        
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            // If not JSON, check if response indicates success
+            if (text.toLowerCase().includes('success') || text.toLowerCase().includes('berhasil')) {
+                data = { success: true };
+            } else {
+                throw new Error('Server error: ' + text);
+            }
+        }
+        
+        if (data.success || data.status === 'success') {
+            loadHistory();
+            hideDeleteModal();
+            alert('Semua data berhasil dihapus');
+        } else {
+            throw new Error(data.message || data.error || 'Unknown error');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting all data:', error);
+        alert('Gagal menghapus semua data. Error: ' + error.message);
+        hideDeleteModal();
+    })
+    .finally(() => {
+        // Reset button
+        if (confirmBtn) {
+            confirmBtn.textContent = 'Ya, Hapus';
+            confirmBtn.disabled = false;
+        }
+    });
+}
+
+// Enhanced alert functions
+function showAlert(message, type = 'info', duration = 3000) {
+    // Remove existing alerts
+    const existingAlert = document.querySelector('.custom-alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `custom-alert alert-${type}`;
+    
+    // Alert styles
+    const styles = {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        padding: '15px 20px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        zIndex: '10000',
+        fontFamily: 'Arial, sans-serif',
+        fontSize: '14px',
+        fontWeight: '500',
+        minWidth: '300px',
+        maxWidth: '400px',
+        transform: 'translateX(100%)',
+        transition: 'all 0.3s ease',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px'
+    };
+    
+    // Type-specific styles and icons
+    const typeConfig = {
+        success: {
+            backgroundColor: '#d4edda',
+            color: '#155724',
+            borderLeft: '4px solid #28a745',
+            icon: '✓'
+        },
+        error: {
+            backgroundColor: '#f8d7da',
+            color: '#721c24',
+            borderLeft: '4px solid #dc3545',
+            icon: '✕'
+        },
+        warning: {
+            backgroundColor: '#fff3cd',
+            color: '#856404',
+            borderLeft: '4px solid #ffc107',
+            icon: '⚠'
+        },
+        info: {
+            backgroundColor: '#d1ecf1',
+            color: '#0c5460',
+            borderLeft: '4px solid #17a2b8',
+            icon: 'ℹ'
+        }
+    };
+    
+    const config = typeConfig[type] || typeConfig.info;
+    
+    // Apply styles
+    Object.assign(alertDiv.style, styles, config);
+    
+    // Add content
+    alertDiv.innerHTML = `
+        <span style="font-size: 16px; font-weight: bold;">${config.icon}</span>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 18px;
+            cursor: pointer;
+            margin-left: auto;
+            padding: 0;
+            opacity: 0.7;
+        ">×</button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Animate in
+    setTimeout(() => {
+        alertDiv.style.transform = 'translateX(0)';
+    }, 10);
+    
+    // Auto remove
+    if (duration > 0) {
+        setTimeout(() => {
+            if (alertDiv.parentElement) {
+                alertDiv.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (alertDiv.parentElement) {
+                        alertDiv.remove();
+                    }
+                }, 300);
+            }
+        }, duration);
+    }
+}
+
+function showConfirmDialog(message, onConfirm, onCancel = null) {
+    // Remove existing dialogs
+    const existingDialog = document.querySelector('.custom-confirm-dialog');
+    if (existingDialog) {
+        existingDialog.remove();
+    }
+    
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'custom-confirm-dialog';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+    
+    // Create dialog
+    const dialog = document.createElement('div');
+    dialog.style.cssText = `
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        max-width: 400px;
+        width: 90%;
+        font-family: Arial, sans-serif;
+        transform: scale(0.8);
+        transition: transform 0.3s ease;
+    `;
+    
+    dialog.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <div style="
+                width: 24px;
+                height: 24px;
+                background: #ff6b6b;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 14px;
+            ">!</div>
+            <h3 style="margin: 0; color: #333; font-size: 18px;">Konfirmasi Hapus</h3>
+        </div>
+        <p style="margin: 0 0 20px 0; color: #666; line-height: 1.5;">${message}</p>
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button id="cancelBtn" style="
+                padding: 10px 20px;
+                border: 1px solid #ddd;
+                background: white;
+                color: #666;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s ease;
+            ">Batal</button>
+            <button id="confirmBtn" style="
+                padding: 10px 20px;
+                border: none;
+                background: #dc3545;
+                color: white;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s ease;
+            ">Hapus</button>
+        </div>
+    `;
+    
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+    
+    // Animate in
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        dialog.style.transform = 'scale(1)';
+    }, 10);
+    
+    // Add hover effects
+    const cancelBtn = dialog.querySelector('#cancelBtn');
+    const confirmBtn = dialog.querySelector('#confirmBtn');
+    
+    cancelBtn.addEventListener('mouseenter', () => {
+        cancelBtn.style.backgroundColor = '#f8f9fa';
+        cancelBtn.style.borderColor = '#adb5bd';
+    });
+    cancelBtn.addEventListener('mouseleave', () => {
+        cancelBtn.style.backgroundColor = 'white';
+        cancelBtn.style.borderColor = '#ddd';
+    });
+    
+    confirmBtn.addEventListener('mouseenter', () => {
+        confirmBtn.style.backgroundColor = '#c82333';
+    });
+    confirmBtn.addEventListener('mouseleave', () => {
+        confirmBtn.style.backgroundColor = '#dc3545';
+    });
+    
+    // Handle events
+    const closeDialog = () => {
+        overlay.style.opacity = '0';
+        dialog.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            if (overlay.parentElement) {
+                overlay.remove();
+            }
+        }, 300);
+    };
+    
+    cancelBtn.addEventListener('click', () => {
+        closeDialog();
+        if (onCancel) onCancel();
+    });
+    
+    confirmBtn.addEventListener('click', () => {
+        closeDialog();
+        onConfirm();
+    });
+    
+    // Close on overlay click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            closeDialog();
+            if (onCancel) onCancel();
+        }
+    });
+    
+    // Close on Escape key
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            closeDialog();
+            if (onCancel) onCancel();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+}
+
+// Delete selected records - ENHANCED VERSION
+function deleteSelectedRecords() {
+    const checkedBoxes = document.querySelectorAll('.rowCheckbox:checked');
+    
+    if (checkedBoxes.length === 0) {
+        showAlert('Silakan pilih setidaknya satu record untuk dihapus.', 'warning');
+        return;
+    }
+    
+    const message = `Apakah Anda yakin ingin menghapus <strong>${checkedBoxes.length}</strong> record yang dipilih?<br><br><small style="color: #999;">Tindakan ini tidak dapat dibatalkan.</small>`;
+    
+    showConfirmDialog(message, () => {
+        // Ambil ID dari checkbox yang dipilih
+        const idsToDelete = Array.from(checkedBoxes).map(cb => parseInt(cb.dataset.id));
+        console.log('IDs to delete:', idsToDelete); // Debug log
+        
+        // Show loading state
+        const deleteBtn = document.getElementById('deleteSelectedBtn');
+        const originalText = deleteBtn.textContent;
+        deleteBtn.innerHTML = `
+            <span style="display: inline-flex; align-items: center; gap: 8px;">
+                <div style="
+                    width: 16px;
+                    height: 16px;
+                    border: 2px solid #fff;
+                    border-top: 2px solid transparent;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                "></div>
+                Menghapus...
+            </span>
+        `;
+        deleteBtn.disabled = true;
+        
+        // Add spinner animation
+        if (!document.querySelector('#spinner-style')) {
+            const style = document.createElement('style');
+            style.id = 'spinner-style';
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Send request
+        const formData = new FormData();
+        formData.append('action', 'delete_selected');
+        formData.append('ids', JSON.stringify(idsToDelete));
+        
+        fetch('delete_sleep_data.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => {
+            console.log('Response status:', res.status);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.text();
+        })
+        .then(text => {
+            console.log('Raw response:', text);
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('Failed to parse JSON:', e);
+                throw new Error('Server returned invalid JSON: ' + text);
+            }
+            
+            if (data.success) {
+                // Reset select all checkbox
+                const selectAllCheckbox = document.getElementById('selectAll');
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = false;
+                }
+                
+                // Reload data
+                loadHistory();
+                
+                // Show success message
+                const deletedCount = data.deleted || checkedBoxes.length;
+                showAlert(
+                    `${deletedCount} record berhasil dihapus`, 
+                    'success', 
+                    4000
+                );
+            } else {
+                throw new Error(data.error || 'Gagal menghapus data');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting selected records:', error);
+            showAlert(
+                `Gagal menghapus data: ${error.message}`, 
+                'error', 
+                5000
+            );
+        })
+        .finally(() => {
+            // Reset button state
+            deleteBtn.textContent = originalText;
+            deleteBtn.disabled = false;
+        });
+    });
+}
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Load initial data
+    loadHistory();
+    
+    // Setup select all checkbox
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', () => {
+            const rowCheckboxes = document.querySelectorAll('.rowCheckbox');
+            rowCheckboxes.forEach(cb => {
+                cb.checked = selectAllCheckbox.checked;
+            });
+            updateDeleteButtonVisibility();
+        });
+    }
+    
+    // Setup delete selected button
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    if (deleteSelectedBtn) {
+        deleteSelectedBtn.addEventListener('click', deleteSelectedRecords);
+        deleteSelectedBtn.style.display = 'none'; // Hide initially
+    }
+    
+    // Setup delete modal
+    const deleteModal = document.getElementById('deleteModal');
+    if (deleteModal) {
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                hideDeleteModal();
+            }
+        });
+    }
+    
+    // Setup modal close buttons
+    const modalCloseBtn = document.querySelector('#deleteModal .close');
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', hideDeleteModal);
+    }
+    
+    const modalCancelBtn = document.querySelector('#deleteModal .cancel');
+    if (modalCancelBtn) {
+        modalCancelBtn.addEventListener('click', hideDeleteModal);
+    }
+    
+    const modalConfirmBtn = document.querySelector('#deleteModal .confirm');
+    if (modalConfirmBtn) {
+        modalConfirmBtn.addEventListener('click', deleteHistory);
+    }
+    
+    // Setup search and filter functionality
+    setupSearchAndFilter();
+});
+
+// Global functions untuk akses dari HTML
+window.loadHistory = loadHistory;
+window.exportData = exportData;
+window.showDeleteModal = showDeleteModal;
+window.hideDeleteModal = hideDeleteModal;
+window.deleteHistory = deleteHistory;
+window.applyFilters = applyFilters;
+window.clearFilters = clearFilters;
+
+// Global data store for filtering
+let allSleepData = [];
+let filteredData = [];
+
+// Update device filter dropdown options
+function updateDeviceFilterOptions(data) {
+    const deviceFilter = document.getElementById('deviceFilter');
+    if (!deviceFilter) return;
+    
+    // Get unique device names
+    const devices = [...new Set(data.map(row => row.device_name).filter(name => name))];
+    
+    // Clear existing options except the first one
+    deviceFilter.innerHTML = '<option value="">All Devices</option>';
+    
+    // Add device options
+    devices.forEach(device => {
+        const option = document.createElement('option');
+        option.value = device;
+        option.textContent = device;
+        deviceFilter.appendChild(option);
+    });
+}
+
+// Setup search and filter functionality
+function setupSearchAndFilter() {
+    const searchInput = document.getElementById('searchInput');
+    const dateFilter = document.getElementById('dateFilter');
+    const deviceFilter = document.getElementById('deviceFilter');
+    const qualityFilter = document.getElementById('qualityFilter');
+    
+    // Real-time search as user types
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(applyFilters, 300));
+    }
+    
+    // Auto-apply filters when changed
+    [dateFilter, deviceFilter, qualityFilter].forEach(filter => {
+        if (filter) {
+            filter.addEventListener('change', applyFilters);
+        }
+    });
+}
+
+// Debounce function to limit search frequency
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Apply all filters and search
+function applyFilters() {
+    console.log('Applying filters...');
+    
+    const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const dateFilter = document.getElementById('dateFilter')?.value || '';
+    const deviceFilter = document.getElementById('deviceFilter')?.value || '';
+    const qualityFilter = document.getElementById('qualityFilter')?.value || '';
+    
+    console.log('Filter values:', { searchTerm, dateFilter, deviceFilter, qualityFilter });
+    console.log('Total data items:', allSleepData.length);
+    
+    filteredData = allSleepData.filter(row => {
+        // Search across all text fields
+        const searchableText = [
+            row.id?.toString(),
+            formatTimestamp(row.timestamp),
+            row.device_name || '',
+            row.daily_microsleeps?.toString(),
+            row.weekly_microsleeps?.toString(),
+            row.monthly_microsleeps?.toString(),
+            row.sleep_quality || ''
+        ].join(' ').toLowerCase();
+        
+        const matchesSearch = !searchTerm || searchableText.includes(searchTerm);
+        
+        // Date filter
+        let matchesDate = true;
+        if (dateFilter) {
+            // Extract date from timestamp string to avoid timezone conversion issues
+            let rowDate;
+            if (typeof row.timestamp === 'string' && row.timestamp.includes('T')) {
+                // Extract YYYY-MM-DD from ISO string
+                rowDate = row.timestamp.split('T')[0];
+            } else {
+                // Fallback to Date parsing
+                const date = new Date(row.timestamp);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                rowDate = `${year}-${month}-${day}`;
+            }
+            matchesDate = rowDate === dateFilter;
+            
+            // Debug logging for date filter
+            if (dateFilter) {
+                console.log(`Row ${row.id}: timestamp="${row.timestamp}", extracted date="${rowDate}", filter="${dateFilter}", matches=${matchesDate}`);
+            }
+        }
+        
+        // Device filter
+        const matchesDevice = !deviceFilter || (row.device_name || '').toLowerCase().includes(deviceFilter.toLowerCase());
+        
+        // Quality filter
+        const matchesQuality = !qualityFilter || (row.sleep_quality || '').toLowerCase() === qualityFilter.toLowerCase();
+        
+        return matchesSearch && matchesDate && matchesDevice && matchesQuality;
+    });
+    
+    // Update table with filtered data
+    renderFilteredTable(filteredData);
+    
+    // Update record count
+    const totalRecords = document.getElementById('totalRecords');
+    if (totalRecords) {
+        const total = filteredData.length;
+        const showing = allSleepData.length !== total ? ` (filtered from ${allSleepData.length})` : '';
+        totalRecords.textContent = `${total} records${showing}`;
+    }
+}
+
+// Clear all filters
+function clearFilters() {
+    console.log('Clearing filters...');
+    
+    const searchInput = document.getElementById('searchInput');
+    const dateFilter = document.getElementById('dateFilter');
+    const deviceFilter = document.getElementById('deviceFilter');
+    const qualityFilter = document.getElementById('qualityFilter');
+    
+    if (searchInput) searchInput.value = '';
+    if (dateFilter) dateFilter.value = '';
+    if (deviceFilter) deviceFilter.value = '';
+    if (qualityFilter) qualityFilter.value = '';
+    
+    // Reset to show all data
+    filteredData = [...allSleepData];
+    renderFilteredTable(filteredData);
+    
+    // Update record count
+    const totalRecords = document.getElementById('totalRecords');
+    if (totalRecords) {
+        totalRecords.textContent = `${allSleepData.length} records`;
+    }
+    
+    console.log('Filters cleared successfully');
+}
+
+// Populate device filter options
+function populateDeviceFilter(data) {
+    const deviceFilter = document.getElementById('deviceFilter');
+    if (!deviceFilter) return;
+    
+    // Get unique devices
+    const devices = [...new Set(data.map(row => row.device_name).filter(Boolean))];
+    
+    // Clear existing options (except "All Devices")
+    deviceFilter.innerHTML = '<option value="">All Devices</option>';
+    
+    // Add device options
+    devices.forEach(device => {
+        const option = document.createElement('option');
+        option.value = device;
+        option.textContent = device;
+        deviceFilter.appendChild(option);
+    });
+}
+
+// Render filtered table
+function renderFilteredTable(data) {
+    const tbody = document.querySelector('#historyTable tbody');
+    if (!tbody) return;
+    
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="12" class="empty-state">No records match your search criteria</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = '';
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="checkbox" class="rowCheckbox" data-id="${row.id}" /></td>
+            <td>#${row.id}</td>
+            <td>${formatTimestamp(row.timestamp)}</td>
+            <td>${row.device_name ?? '-'}</td>
+            <td>${row.daily_microsleeps}</td>
+            <td>${row.weekly_microsleeps}</td>
+            <td>${fmt(row.weekly_hours)}</td>
+            <td>${fmt(row.weekly_rate)}%</td>
+            <td>${row.monthly_microsleeps}</td>
+            <td>${fmt(row.monthly_hours)}</td>
+            <td>${fmt(row.monthly_rate)}%</td>
+            <td>${row.sleep_quality}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+    
+    // Re-attach event listeners for checkboxes
+    attachCheckboxListeners();
+}
+
+// Enhanced renderTable function with filtering support
+function renderTable(data) {
+    console.log('renderTable called with data:', data);
+    console.log('Data length:', data ? data.length : 'undefined');
+    
+    // Store data globally for filtering
+    allSleepData = [...data];
+    filteredData = [...data];
+    
+    console.log('Global data stored - allSleepData:', allSleepData.length);
+    
+    // Populate device filter
+    populateDeviceFilter(data);
+    
+    // Render table directly
+    renderFilteredTable(data);
+    
+    // Update stats
+    const totalRecords = document.getElementById('totalRecords');
+    if (totalRecords) {
+        totalRecords.textContent = `${data.length} records`;
+    }
+    
+    const lastUpdate = document.getElementById('lastUpdate');
+    if (lastUpdate) {
+        lastUpdate.textContent = new Date().toLocaleString();
+    }
+}
+</script>
+    <script src="pwa-install.js"></script>
+</body>
+</html>

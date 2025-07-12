@@ -1,0 +1,458 @@
+* {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+    }
+
+    .header {
+      text-align: center;
+      padding: 30px 20px 20px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+      position: relative;
+      padding-left: 80px; /* Tambahkan padding kiri agar tidak tabrakan dengan tombol kembali */
+      padding-right: 20px; /* Tambahkan padding kanan agar simetris */
+    }
+
+    .header h2 {
+      color: #333;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    /* Gaya baru untuk tombol kembali yang lebih estetik (dengan gradien) */
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      /* UBAH INI: Latar belakang gradien */
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Gradien biru-ungu */
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      /* UBAH INI: Bayangan lebih lembut dan sesuai gradien */
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3); 
+      text-decoration: none;
+      /* UBAH INI: Warna ikon putih untuk kontras dengan gradien */
+      color: white; 
+      font-size: 24px;
+      font-weight: bold;
+      z-index: 10;
+    }
+
+    .back-button:hover {
+      /* UBAH INI: Sedikit menggelapkan gradien atau mengubah arah */
+      background: linear-gradient(135deg, #5a6ed0 0%, #6c4194 100%); /* Gradien sedikit lebih gelap saat hover */
+      color: white; 
+      /* UBAH INI: Bayangan lebih menonjol */
+      box-shadow: 0 12px 25px rgba(102, 126, 234, 0.5); 
+      transform: translateY(-4px) scale(1.05);
+    }
+
+    .back-button:active {
+      transform: translateY(-1px) scale(0.98);
+      /* UBAH INI: Bayangan lebih kecil saat aktif */
+      box-shadow: 0 5px 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .back-button span {
+        display: block;
+        transform: translateX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .back-button:hover span {
+        transform: translateX(-2px);
+    }
+
+    .tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.8);
+      margin: 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 16px 20px;
+      border: none;
+      background: transparent;
+      color: #666;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tabs button:hover {
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+    }
+
+    .tabs button.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+      background: rgba(102, 126, 234, 0.1);
+    }
+
+    .tab-content {
+      display: none;
+      padding: 30px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tab-content h3 {
+      color: #333;
+      font-size: 22px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      color: #555;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e1e5e9;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .form-group input:disabled {
+      background: #e9ecef;
+      color: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .save-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 30px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .save-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .info-card {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 4px solid #667eea;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .info-value {
+      color: #666;
+      font-family: 'Courier New', monospace;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-disconnected {
+      background: #fff5f5;
+      color: #e53e3e;
+      border: 1px solid #fed7d7;
+    }
+
+    .status-connected {
+      background: #f0fff4;
+      color: #38a169;
+      border: 1px solid #c6f6d5;
+    }
+
+    .about-section {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .about-section h4 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .about-section p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .version-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .version-card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #e1e5e9;
+    }
+
+    .version-card strong {
+      color: #333;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        border-radius: 15px;
+      }
+
+      .header {
+        padding: 25px 15px 15px;
+        padding-left: 70px; /* Sesuaikan padding kiri untuk tombol kembali */
+      }
+
+      .header h2 {
+        font-size: 24px;
+      }
+      
+      .back-button {
+        top: 15px; /* Sesuaikan posisi vertikal untuk mobile */
+        left: 15px; /* Sesuaikan posisi horizontal untuk mobile */
+        width: 44px;
+        height: 44px;
+        font-size: 22px;
+      }
+
+      .tabs {
+        flex-direction: column;
+      }
+
+      .tabs button {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        border-right: none;
+      }
+
+      .tabs button.active {
+        border-bottom-color: rgba(0, 0, 0, 0.1);
+        border-left: 3px solid #667eea;
+      }
+
+      .tab-content {
+        padding: 20px 15px;
+      }
+
+      .tab-content h3 {
+        font-size: 20px;
+      }
+
+      .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+
+      .version-info {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h2 {
+        font-size: 22px;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        font-size: 16px; /* Prevent zoom on iOS */
+      }
+
+      .save-btn {
+        width: 100%;
+        padding: 16px;
+      }
+
+      .info-card {
+        padding: 15px;
+      }
+
+      .about-section {
+        padding: 20px;
+      }
+    }
+
+    /* Animation for elements */
+    .form-group {
+      animation: slideInUp 0.6s ease forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+    .form-group:nth-child(4) { animation-delay: 0.4s; }
+    .form-group:nth-child(5) { animation-delay: 0.5s; }
+
+    @keyframes slideInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .info-card {
+      animation: fadeIn 0.8s ease forwards;
+    }
+    
+    .password-toggle {
+    position: absolute;
+    right: 15px; /* Sesuaikan posisi horizontal */
+    top: 50%; /* Sesuaikan posisi vertikal */
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666; /* Warna ikon */
+    font-size: 20px; /* Ukuran ikon */
+    transition: color 0.3s ease;
+    z-index: 5; /* Pastikan di atas input */
+}
+
+.password-toggle:hover {
+    color: #667eea; /* Warna saat hover */
+}
+
+/* Sesuaikan top jika label Anda ada di atas input */
+.form-group label + input + .password-toggle {
+    top: calc(50% + 10px); /* Sesuaikan ini jika label mempengaruhi posisi vertikal */
+    /* top: 45px; /* Atau bisa juga dengan nilai absolut jika Anda tahu tinggi label */ 
+}
+
+/* Perbaikan untuk padding input agar tidak tertutup ikon */
+.form-group input[name="password"] {
+    padding-right: 40px; /* Beri ruang ekstra untuk ikon */
+}
+
+
+    .about-section {
+      animation: fadeIn 1s ease forwards;
+    }

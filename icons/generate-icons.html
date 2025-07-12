@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate PWA Icons</title>
+</head>
+<body>
+    <canvas id="canvas72" width="72" height="72"></canvas>
+    <canvas id="canvas192" width="192" height="192"></canvas>
+    <canvas id="canvas512" width="512" height="512"></canvas>
+    
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = '#2196F3';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Sleep icon (moon)
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(size * 0.6, size * 0.4, size * 0.25, 0, Math.PI * 1.5);
+            ctx.arc(size * 0.55, size * 0.35, size * 0.25, Math.PI * 0.5, Math.PI * 2);
+            ctx.fill();
+            
+            // Stars
+            for(let i = 0; i < 3; i++) {
+                const x = size * (0.2 + i * 0.15);
+                const y = size * (0.7 + (i % 2) * 0.1);
+                drawStar(ctx, x, y, size * 0.03);
+            }
+        }
+        
+        function drawStar(ctx, x, y, radius) {
+            ctx.beginPath();
+            for(let i = 0; i < 5; i++) {
+                const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
+                const x1 = x + Math.cos(angle) * radius;
+                const y1 = y + Math.sin(angle) * radius;
+                if(i === 0) ctx.moveTo(x1, y1);
+                else ctx.lineTo(x1, y1);
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        drawIcon(document.getElementById('canvas72'), 72);
+        drawIcon(document.getElementById('canvas192'), 192);
+        drawIcon(document.getElementById('canvas512'), 512);
+        
+        // Auto download
+        setTimeout(() => {
+            ['canvas72', 'canvas192', 'canvas512'].forEach(id => {
+                const canvas = document.getElementById(id);
+                const size = id.replace('canvas', '');
+                const link = document.createElement('a');
+                link.download = `icon-${size}x${size}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }, 1000);
+    </script>
+</body>
+</html>
